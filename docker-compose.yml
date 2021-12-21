@@ -1,0 +1,46 @@
+version: '3.9'
+
+services:
+  mariadb-master:
+    image: 'bitnami/mariadb:latest'
+    ports:
+      - '33306:3306'
+    volumes:
+      - mariadb-persistence:/bitnami/mariadb
+    environment:
+      - MARIADB_REPLICATION_MODE=master
+      - MARIADB_REPLICATION_USER=repl_user
+      - MARIADB_REPLICATION_PASSWORD=repl_password
+      - MARIADB_ROOT_PASSWORD=1234
+      - MARIADB_USER=my_user
+      - MARIADB_PASSWORD=my_password
+      - MARIADB_DATABASE=clasificacion_sisben
+
+  mariadb-slave:
+    image: 'bitnami/mariadb:latest'
+    ports:
+      - '33307:3306'
+    depends_on:
+      - mariadb-master
+    environment:
+      - MARIADB_REPLICATION_MODE=slave
+      - MARIADB_REPLICATION_USER=repl_user
+      - MARIADB_REPLICATION_PASSWORD=repl_password
+      - MARIADB_MASTER_HOST=mariadb-master
+      - MARIADB_MASTER_PORT_NUMBER=3306
+      - MARIADB_MASTER_ROOT_PASSWORD=1234
+
+  my_app:    
+    build: .          
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mariadb-master     
+    
+    
+
+volumes:
+  mariadb-persistence:  
+     
+ 
+
